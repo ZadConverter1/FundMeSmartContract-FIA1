@@ -18,4 +18,3 @@ docs/
 /lib 
 foundry.toml
 .gas-snapshot
-.gitignore
