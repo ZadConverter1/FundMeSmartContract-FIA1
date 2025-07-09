@@ -8,13 +8,18 @@ import {ScriptDeploy} from "script/DeployFundMe.s.sol";
 
 contract FundMeTest is Test {
     FundCon internal fundCon;
-    address USER = makeAddr("Nigga");
+    address USER = makeAddr("Home");
     uint256 STARTING_BALANCE = 1 ether;
 
     function setUp() external {
         ScriptDeploy scriptDeploy = new ScriptDeploy();
         fundCon = scriptDeploy.run();
         vm.deal(USER, STARTING_BALANCE);
+    }
+
+    function testOwner() public view {
+        address owner = fundCon.getOwner();
+        assertNotEq(USER, owner);
     }
 
     function testVersion() public view {
@@ -61,16 +66,20 @@ contract FundMeTest is Test {
     function testWithdrawWithMultiple() public poor {
         for (uint160 idx = 1; idx < 10; idx++) {
             hoax(address(idx), STARTING_BALANCE);
-            fundCon.fund{value: STARTING_BALANCE}();
+            fundCon.fund{value: 1 ether}();
         }
-        uint256 initialOwnerBalance = fundCon.getOwner().balance;
         uint256 initialConBalance = address(fundCon).balance;
-        vm.prank(fundCon.getOwner());
+        uint256 initialOwnerBalance = fundCon.getOwner().balance;
+        assertGt(initialConBalance, initialOwnerBalance);
+        console.log(initialConBalance, "<-- Contract after being funded.");
+        address owner = fundCon.getOwner();
+        vm.prank(owner);
         fundCon.withdraw();
-        uint256 finalOwnerBalance = fundCon.getOwner().balance;
-        uint256 finalConBalance = address(fundCon).balance;
-        assertEq(initialOwnerBalance, finalConBalance);
-        assertEq(initialConBalance, finalOwnerBalance);
+        console.log(
+            fundCon.getOwner().balance,
+            "<-- Owner balance after withdrawing"
+        );
+        assertEq(initialConBalance, fundCon.getOwner().balance);
     }
 
     modifier funded() {
