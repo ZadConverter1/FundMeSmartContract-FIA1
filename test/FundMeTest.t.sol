@@ -94,33 +94,3 @@ contract FundMeTest is Test {
         _;
     }
 }
-
-/*
-makeAddr(name) 
-  → Creates a deterministic new address from a string.
-
-vm.prank(address) 
-  → Sets the next call's msg.sender to `address`.
-
-vm.startPrank(address) 
-  → Sets all subsequent calls’ msg.sender to `address` (until vm.stopPrank()).
-
-vm.stopPrank() 
-  → Stops an ongoing startPrank.
-
-vm.deal(address, amount) 
-  → Gives `amount` wei/ETH to the address.
-
-hoax(address, amount) 
-  → Equivalent to: 
-      vm.deal(address, amount) + vm.prank(address)
-
-vm.txGasPrice(_priceValue) 
-  → Sets tx.gasprice for subsequent transactions (used in cost calculations).
-
-gasleft() 
-  → Returns the amount of gas left (like in raw Solidity).
-
-tx.gasprice 
-  → The gas price per unit gas for the current transaction.
-*/
