@@ -24,12 +24,11 @@ contract FundCon {
     }
 
     function fund() public payable {
-        if (msg.value.convertEthToUsd(s_priceList) < MINUSDPRICE) {
+        uint256 amount_sent = msg.value.convertEthToUsd(s_priceList);
+        if (amount_sent < MINUSDPRICE) {
             revert FundCon__minPriceNotReached();
         } else {
-            s_funderToAmount[msg.sender] = msg.value.convertEthToUsd(
-                s_priceList
-            );
+            s_funderToAmount[msg.sender] = amount_sent;
             s_listOfFunders.push(msg.sender);
         }
     }
@@ -63,6 +62,11 @@ contract FundCon {
 
     function getOwner() external view returns (address) {
         return i_owner;
+    }
+
+    function getListLength() external view returns (uint256) {
+        uint256 funders = s_listOfFunders.length;
+        return funders;
     }
 
     receive() external payable {

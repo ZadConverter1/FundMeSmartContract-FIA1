@@ -3,20 +3,20 @@
 pragma solidity 0.8.24;
 
 import {Script} from "forge-std/Script.sol";
-import {MockV3Aggregator} from "test/mocks/MockV3Aggregator.sol";
+import {MockV3Aggregator as mock} from "test/mocks/MockV3Aggregator.sol";
 
 contract HelperConfig is Script {
     NetworkConfig public activeNetworkConfig;
-    uint8 public constant DECIMAL = 8;
-    int256 public constant INITIAL_PRICE = 3000e8;
+    int256 constant INITIAL_ANSWER = 3050e18;
+    uint8 constant DECIMAL = 8;
 
     constructor() {
         if (block.chainid == 11155111) {
-            activeNetworkConfig = getSepoliaEthConfig();
+            activeNetworkConfig = getSepoliaConfig();
         } else if (block.chainid == 1) {
-            activeNetworkConfig = getMainnetEthConfig();
+            activeNetworkConfig = getEthMainnetConfig();
         } else {
-            activeNetworkConfig = getAnvilConfig();
+            activeNetworkConfig = getAnvilDefaulConfig();
         }
     }
 
@@ -24,35 +24,33 @@ contract HelperConfig is Script {
         address priceFeed;
     }
 
-    function getSepoliaEthConfig() private pure returns (NetworkConfig memory) {
-        NetworkConfig memory sepoliaNetwork = NetworkConfig({
-            priceFeed: 0x694AA1769357215DE4FAC081bf1f309aDC325306
-        });
-        return sepoliaNetwork;
+    function getSepoliaConfig() internal pure returns (NetworkConfig memory) {
+        NetworkConfig memory sepoliaConfig;
+        sepoliaConfig.priceFeed = 0x694AA1769357215DE4FAC081bf1f309aDC325306;
+        return sepoliaConfig;
     }
 
-    function getMainnetEthConfig() private pure returns (NetworkConfig memory) {
-        NetworkConfig memory ethMainNetwork = NetworkConfig({
-            priceFeed: 0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419
-        });
-        return ethMainNetwork;
+    function getEthMainnetConfig()
+        internal
+        pure
+        returns (NetworkConfig memory)
+    {
+        NetworkConfig memory ethMainnetConfig;
+        ethMainnetConfig.priceFeed = 0x5424384B256154046E9667dDFaaa5e550145215e;
+        return ethMainnetConfig;
     }
 
-    function getAnvilConfig() private returns (NetworkConfig memory) {
+    function getAnvilDefaulConfig() internal returns (NetworkConfig memory) {
         if (activeNetworkConfig.priceFeed != address(0)) {
             return activeNetworkConfig;
-        } else {
-            vm.startBroadcast();
-            MockV3Aggregator mockPriceFeed = new MockV3Aggregator(
-                DECIMAL,
-                INITIAL_PRICE
-            );
-            vm.stopBroadcast();
-
-            NetworkConfig memory anvilConfig = NetworkConfig({
-                priceFeed: address(mockPriceFeed)
-            });
-            return anvilConfig;
         }
+        vm.startBroadcast();
+        mock con = new mock(DECIMAL, INITIAL_ANSWER);
+        vm.stopBroadcast();
+
+        NetworkConfig memory anvilDefaultConfig = NetworkConfig({
+            priceFeed: address(con)
+        });
+        return anvilDefaultConfig;
     }
 }

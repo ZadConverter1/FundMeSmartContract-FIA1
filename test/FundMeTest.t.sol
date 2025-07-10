@@ -24,7 +24,7 @@ contract FundMeTest is Test {
 
     function testVersion() public view {
         uint256 vers = fundCon.versionCheck();
-        assertEq(vers, 4);
+        assertEq(vers, 6);
     }
 
     function testMathsStuff() public view {
@@ -64,22 +64,22 @@ contract FundMeTest is Test {
     }
 
     function testWithdrawWithMultiple() public poor {
-        for (uint160 idx = 1; idx < 10; idx++) {
-            hoax(address(idx), STARTING_BALANCE);
-            fundCon.fund{value: 1 ether}();
+        uint256 initialOwnerBalance = fundCon.getOwner().balance;
+        console.log(initialOwnerBalance, "<-- Should be null.");
+        for (uint160 idx; idx < 10; idx++) {
+            hoax(address(idx), STARTING_BALANCE + 1 ether);
+            fundCon.fund{value: STARTING_BALANCE + 1 ether}();
         }
         uint256 initialConBalance = address(fundCon).balance;
-        uint256 initialOwnerBalance = fundCon.getOwner().balance;
-        assertGt(initialConBalance, initialOwnerBalance);
-        console.log(initialConBalance, "<-- Contract after being funded.");
-        address owner = fundCon.getOwner();
-        vm.prank(owner);
+        console.log(initialConBalance, "<-- Should be 20000000000000000000.");
+        vm.prank(fundCon.getOwner());
         fundCon.withdraw();
-        console.log(
-            fundCon.getOwner().balance,
-            "<-- Owner balance after withdrawing"
-        );
-        assertEq(initialConBalance, fundCon.getOwner().balance);
+        uint256 finalConBalance = address(fundCon).balance;
+        console.log(finalConBalance, "<-- should be null");
+        uint256 finalOwnerBalance = fundCon.getOwner().balance;
+        console.log(finalOwnerBalance, "<-- should be 20000000000000000000");
+        assertEq(initialConBalance, finalOwnerBalance);
+        assertEq(finalConBalance, initialOwnerBalance);
     }
 
     modifier funded() {
